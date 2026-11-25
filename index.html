@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#10243c">
+  <meta name="description" content="Create a cozy Winter Bear love note and keep it as a video memory.">
+  <title>Winter Bear Studio</title>
+  <link rel="stylesheet" href="/src/style.css">
+</head>
+<body>
+  <main class="app-shell">
+    <header class="topbar">
+      <div class="brand-mark">❄</div>
+      <div><p class="eyebrow">A LITTLE NOTE • A LASTING MEMORY</p><h1>WINTER BEAR <span>STUDIO</span></h1></div>
+    </header>
+
+    <section class="hero scene-card" aria-label="Winter Bear scene">
+      <div class="scene-glow"></div><div class="moon"></div>
+      <div class="pine pine-one">♠</div><div class="pine pine-two">♠</div><div class="cabin"><span>▰</span><i></i></div>
+      <div class="bear" aria-label="Polar bear">🐻‍❄️</div>
+      <div class="snow-layer"></div>
+      <div class="hero-copy"><p class="eyebrow">A COZY MOMENT IN THE SNOW</p><h2>Warm Hearts<br> Beneath the Snow</h2><p>A little polar bear, a glowing cabin, and a forest dressed in snow.</p></div>
+    </section>
+
+    <section class="panel">
+      <p class="eyebrow">YOUR HEARTFELT MESSAGE</p><h2>Create a Love Note</h2>
+      <label for="recipient">To someone special</label>
+      <input id="recipient" maxlength="60" value="Hello" placeholder="Name or recipient">
+      <label for="occasion">Choose an occasion</label>
+      <select id="occasion"><option>Just Because / Love</option><option>Birthday</option><option>Anniversary</option><option>Thank You</option><option>Thinking of You</option><option>Christmas / Holiday</option></select>
+      <label for="message">Your message</label>
+      <textarea id="message" maxlength="500" placeholder="Write something meaningful...">Together feels like home. ❄️❤️</textarea>
+      <div class="counter"><span>Make every word count</span><span id="count">29 / 500</span></div>
+      <div class="button-row"><button class="button secondary" id="previewBtn">Preview Note</button><button class="button secondary" id="saveNoteBtn">Save Message</button></div>
+    </section>
+
+    <section class="panel note-panel" id="notePanel">
+      <p class="eyebrow">A NOTE FROM YOUR CHOSEN WORLD</p><div class="note-icon">❄️</div>
+      <p class="note-to" id="previewTo">For Hello</p><h2 id="previewOccasion">Just Because / Love</h2>
+      <p class="note-message" id="previewMessage">Together feels like home. ❄️❤️</p>
+      <p class="signature">Made with love in every season</p>
+    </section>
+
+    <section class="panel export-panel">
+      <p class="eyebrow">KEEP THIS MOMENT</p><h2>Create a Winter Snow Bear Memory</h2>
+      <p>Render a short animated winter scene with your personal message, then save the MP4 video.</p>
+      <button class="button primary" id="createVideoBtn">❄ Create Winter Snow Bear MP4</button>
+      <div class="progress-wrap" id="progressWrap" hidden><div class="progress-track"><div id="progressBar"></div></div><p id="status" role="status">Preparing your winter memory…</p></div>
+      <div id="result" class="result" hidden></div>
+      <video id="videoPreview" controls playsinline hidden></video>
+    </section>
+    <footer>WINTER BEAR STUDIO <span>Made with heartfelt words</span></footer>
+  </main>
+
+  <script src="https://unpkg.com/@ffmpeg/ffmpeg@0.11.6/dist/ffmpeg.min.js"></script>
+  <script type="module" src="/src/main.js"></script>
+</body>
+</html>
