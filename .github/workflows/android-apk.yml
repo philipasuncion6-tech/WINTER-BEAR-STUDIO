@@ -2,6 +2,8 @@ name: Build Winter Bear Android APK
 on:
   push:
     branches: [main]
+  pull_request:
+    branches: [main]
   workflow_dispatch:
 permissions:
   contents: read
@@ -19,6 +21,10 @@ jobs:
         run: npm run build
       - name: Add Android platform
         run: npx cap add android
+      - name: Install Winter Bear Android Downloads bridge
+        run: |
+          mkdir -p android/app/src/main/java/com/asuncion/winterbearstudio
+          cp android-template/MainActivity.java android/app/src/main/java/com/asuncion/winterbearstudio/MainActivity.java
       - name: Sync Capacitor
         run: npx cap sync android
       - name: Set up Java 21
