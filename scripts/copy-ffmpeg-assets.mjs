@@ -2,7 +2,7 @@ import { mkdir, copyFile } from 'node:fs/promises';
 import { dirname, resolve } from 'node:path';
 
 const files = [
-  ['@ffmpeg/ffmpeg/dist/esm/814.ffmpeg.js', 'public/assets/814.ffmpeg.js'],
+  ['@ffmpeg/ffmpeg/dist/umd/814.ffmpeg.js', 'public/assets/814.ffmpeg.js'],
   ['@ffmpeg/core/dist/esm/ffmpeg-core.js', 'public/assets/ffmpeg-core-esm.js'],
   ['@ffmpeg/core/dist/esm/ffmpeg-core.wasm', 'public/assets/ffmpeg-core-esm.wasm']
 ];
