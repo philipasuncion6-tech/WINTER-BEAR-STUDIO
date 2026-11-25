@@ -44,64 +44,75 @@ $('saveNoteBtn').addEventListener('click', () => {
 
 updatePreview();
 
+const winterScene = new Image();
+winterScene.src = new URL('./winter-bear-scene.svg', import.meta.url).href;
+const snowParticles = Array.from({ length: 145 }, (_, i) => ({
+  x: (i * 83.17) % 540,
+  y: (i * 61.73) % 960,
+  radius: 0.8 + (i % 5) * 0.48,
+  speed: 1.2 + (i % 7) * 0.48,
+  drift: Math.sin(i * 2.4) * 0.42,
+  alpha: 0.34 + (i % 6) * 0.1
+}));
+
 function drawScene(ctx, width, height, frame) {
-  const gradient = ctx.createLinearGradient(0, 0, 0, height);
-  gradient.addColorStop(0, '#102c4b');
-  gradient.addColorStop(0.62, '#7196ad');
-  gradient.addColorStop(1, '#e6f1f4');
-  ctx.fillStyle = gradient;
-  ctx.fillRect(0, 0, width, height);
-
-  ctx.fillStyle = '#fff0c9';
-  ctx.beginPath();
-  ctx.arc(width * 0.78, height * 0.15, 34, 0, Math.PI * 2);
-  ctx.fill();
-
-  for (let i = 0; i < 7; i++) {
-    const x = (i * 83 + 25) % width;
-    const y = height * 0.35 + (i % 3) * 25;
-    ctx.fillStyle = '#173e43';
-    ctx.beginPath();
-    ctx.moveTo(x, y - 100);
-    ctx.lineTo(x - 42, y + 20);
-    ctx.lineTo(x + 42, y + 20);
-    ctx.closePath();
-    ctx.fill();
+  if (winterScene.complete && winterScene.naturalWidth) {
+    ctx.drawImage(winterScene, 0, 0, width, height);
+  } else {
+    const fallback = ctx.createLinearGradient(0, 0, 0, height);
+    fallback.addColorStop(0, '#09264c');
+    fallback.addColorStop(1, '#eaf7ff');
+    ctx.fillStyle = fallback;
+    ctx.fillRect(0, 0, width, height);
   }
 
-  ctx.fillStyle = '#674b3d';
-  ctx.fillRect(width * 0.68, height * 0.49, 105, 90);
-  ctx.fillStyle = '#49363a';
-  ctx.beginPath();
-  ctx.moveTo(width * 0.65, height * 0.5);
-  ctx.lineTo(width * 0.73, height * 0.39);
-  ctx.lineTo(width * 0.82, height * 0.5);
-  ctx.fill();
-  ctx.fillStyle = '#ffd27d';
-  ctx.fillRect(width * 0.72, height * 0.54, 22, 35);
+  // A gentle, bright aurora shimmer, kept subtle for the foreground.
+  const aurora = ctx.createLinearGradient(0, 80, width, 360);
+  aurora.addColorStop(0, 'rgba(64,255,205,0)');
+  aurora.addColorStop(0.48, 'rgba(80,255,218,0.16)');
+  aurora.addColorStop(1, 'rgba(133,144,255,0)');
+  ctx.fillStyle = aurora;
+  ctx.fillRect(0, 40, width, 360);
 
-  ctx.font = '112px serif';
-  ctx.textAlign = 'center';
-  ctx.fillText('🐻‍❄️', width * 0.34, height * 0.67);
-
-  ctx.fillStyle = '#fff';
-  for (let i = 0; i < 90; i++) {
-    const x = (i * 47 + frame * 1.8) % width;
-    const y = (i * 71 + frame * 3.5) % height;
-    ctx.globalAlpha = 0.45 + (i % 5) * 0.1;
+  // Three depth layers of continuously falling snow.
+  for (const flake of snowParticles) {
+    const y = (flake.y + frame * flake.speed) % height;
+    const x = (flake.x + Math.sin((frame + flake.y) * 0.018) * 13 + frame * flake.drift * 0.12 + width) % width;
+    ctx.globalAlpha = flake.alpha;
+    ctx.fillStyle = '#ffffff';
     ctx.beginPath();
-    ctx.arc(x, y, 1.5 + (i % 3), 0, Math.PI * 2);
+    ctx.arc(x, y, flake.radius, 0, Math.PI * 2);
     ctx.fill();
   }
   ctx.globalAlpha = 1;
 
-  ctx.fillStyle = '#102b46';
+  // Soft warm glow from the cabin and lanterns.
+  const glow = ctx.createRadialGradient(width * .73, height * .54, 2, width * .73, height * .54, 150);
+  glow.addColorStop(0, 'rgba(255,205,112,.17)');
+  glow.addColorStop(1, 'rgba(255,205,112,0)');
+  ctx.fillStyle = glow;
+  ctx.fillRect(width * .42, height * .35, width * .58, height * .42);
+
+  // Personal note appears clearly over the snow in the closing section.
+  const fade = Math.min(1, Math.max(0, (frame - 110) / 32));
+  ctx.globalAlpha = fade;
+  ctx.fillStyle = 'rgba(7, 30, 55, .66)';
+  ctx.beginPath();
+  ctx.roundRect(width * .07, height * .77, width * .86, height * .17, 18);
+  ctx.fill();
   ctx.textAlign = 'center';
-  ctx.font = 'bold 25px sans-serif';
-  ctx.fillText('A COZY WINTER MOMENT', width / 2, height * 0.79);
-  ctx.font = '21px Georgia';
-  const words = (message.value.trim() || 'Together feels like home.').slice(0, 90);
-  wrapText(ctx, words, width / 2, height * 0.85, width * 0.82, 29);
+  ctx.fillStyle = '#ffffff';
+  ctx.shadowColor = 'rgba(0,0,0,.65)';
+  ctx.shadowBlur = 5;
+  ctx.font = 'bold 22px Georgia';
+  ctx.fillText((recipient.value.trim() || 'Someone special').slice(0, 34), width / 2, height * .81);
+  ctx.font = 'bold 25px Georgia';
+  const words = (message.value.trim() || 'Together feels like home.').slice(0, 105);
+  wrapText(ctx, words, width / 2, height * .85, width * .76, 29);
+  ctx.font = '14px sans-serif';
+  ctx.fillText('WINTER BEAR STUDIO', width / 2, height * .925);
+  ctx.shadowBlur = 0;
+  ctx.globalAlpha = 1;
 }
 
 function wrapText(ctx, text, x, y, maxWidth, lineHeight) {
@@ -165,7 +176,7 @@ async function createVideo() {
   result.hidden = true;
   progressWrap.hidden = false;
   progressBar.style.width = '3%';
-  status.textContent = 'Preparing the snowy scene…';
+  status.textContent = 'Preparing the bright snowy scene…';\n  if (!winterScene.complete) await new Promise((resolve, reject) => { winterScene.onload = resolve; winterScene.onerror = () => reject(new Error('Winter Bear background could not load.')); });
 
   let stream;
   let recorder;
