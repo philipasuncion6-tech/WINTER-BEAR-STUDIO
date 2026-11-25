@@ -24,7 +24,7 @@ jobs:
       - name: Install Winter Bear Android Downloads bridge
         run: |
           mkdir -p android/app/src/main/java/com/asuncion/winterbearstudio
-          cp android-template/MainActivity.java android/app/src/main/java/com/asuncion/winterbearstudio/MainActivity.java
+          cp android-template/MainActivity.java android/app/src/main/java/com/asuncion/winterbearstudio/MainActivity.java\n          mkdir -p android/app/src/main/res\n          cp -R android-template/res/. android/app/src/main/res/
       - name: Sync Capacitor
         run: npx cap sync android
       - name: Set up Java 21
