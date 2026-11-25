@@ -176,7 +176,8 @@ async function createVideo() {
   result.hidden = true;
   progressWrap.hidden = false;
   progressBar.style.width = '3%';
-  status.textContent = 'Preparing the bright snowy scene…';\n  if (!winterScene.complete) await new Promise((resolve, reject) => { winterScene.onload = resolve; winterScene.onerror = () => reject(new Error('Winter Bear background could not load.')); });
+  status.textContent = 'Preparing the bright snowy scene…';
+  if (!winterScene.complete) await new Promise((resolve, reject) => { winterScene.onload = resolve; winterScene.onerror = () => reject(new Error('Winter Bear background could not load.')); });
 
   let stream;
   let recorder;
