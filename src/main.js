@@ -46,13 +46,14 @@ updatePreview();
 
 const winterScene = new Image();
 winterScene.src = new URL('./winter-bear-scene.svg', import.meta.url).href;
-const snowParticles = Array.from({ length: 145 }, (_, i) => ({
+const snowParticles = Array.from({ length: 190 }, (_, i) => ({
   x: (i * 83.17) % 540,
   y: (i * 61.73) % 960,
-  radius: 0.8 + (i % 5) * 0.48,
-  speed: 1.2 + (i % 7) * 0.48,
-  drift: Math.sin(i * 2.4) * 0.42,
-  alpha: 0.34 + (i % 6) * 0.1
+  radius: 0.55 + (i % 7) * 0.42,
+  speed: 0.65 + (i % 9) * 0.38,
+  drift: Math.sin(i * 2.4) * (0.35 + (i % 4) * 0.18),
+  alpha: 0.28 + (i % 7) * 0.095,
+  depth: i % 3
 }));
 
 function drawScene(ctx, width, height, frame) {
@@ -66,35 +67,54 @@ function drawScene(ctx, width, height, frame) {
     ctx.fillRect(0, 0, width, height);
   }
 
-  // A gentle, bright aurora shimmer, kept subtle for the foreground.
-  const aurora = ctx.createLinearGradient(0, 80, width, 360);
-  aurora.addColorStop(0, 'rgba(64,255,205,0)');
-  aurora.addColorStop(0.48, 'rgba(80,255,218,0.16)');
-  aurora.addColorStop(1, 'rgba(133,144,255,0)');
-  ctx.fillStyle = aurora;
-  ctx.fillRect(0, 40, width, 360);
+  // Living aurora ribbons: slow movement keeps the scene cinematic without heavy rendering.
+  const sway = Math.sin(frame * 0.018) * 24;
+  for (let layer = 0; layer < 3; layer++) {
+    const y = 145 + layer * 66;
+    const ribbon = ctx.createLinearGradient(0, y, width, y + 150);
+    ribbon.addColorStop(0, 'rgba(52,255,205,0)');
+    ribbon.addColorStop(0.42, `rgba(75,255,213,${0.10 + layer * 0.025})`);
+    ribbon.addColorStop(0.72, 'rgba(119,173,255,0.10)');
+    ribbon.addColorStop(1, 'rgba(133,144,255,0)');
+    ctx.beginPath();
+    ctx.moveTo(-30, y + 65);
+    ctx.bezierCurveTo(width * 0.24, y - 45 + sway, width * 0.58, y + 115 - sway, width + 30, y + 18);
+    ctx.lineWidth = 34 - layer * 6;
+    ctx.strokeStyle = ribbon;
+    ctx.stroke();
+  }
+
+  // Soft moon halo pulse adds depth while preserving the original artwork.
+  const moonPulse = 0.92 + (Math.sin(frame * 0.035) + 1) * 0.06;
+  const moonGlow = ctx.createRadialGradient(width * 0.755, height * 0.14, 8, width * 0.755, height * 0.14, 150 * moonPulse);
+  moonGlow.addColorStop(0, 'rgba(210,241,255,0.15)');
+  moonGlow.addColorStop(1, 'rgba(210,241,255,0)');
+  ctx.fillStyle = moonGlow;
+  ctx.fillRect(width * 0.52, 0, width * 0.46, height * 0.32);
 
   // Three depth layers of continuously falling snow.
   for (const flake of snowParticles) {
-    const y = (flake.y + frame * flake.speed) % height;
-    const x = (flake.x + Math.sin((frame + flake.y) * 0.018) * 13 + frame * flake.drift * 0.12 + width) % width;
-    ctx.globalAlpha = flake.alpha;
+    const y = (flake.y + frame * flake.speed * (flake.depth === 0 ? 0.72 : flake.depth === 2 ? 1.42 : 1)) % height;
+    const wind = Math.sin(frame * 0.022 + flake.y * 0.025) * (flake.depth === 2 ? 25 : 14);
+    const x = (flake.x + wind + frame * flake.drift * 0.18 + width) % width;
+    ctx.globalAlpha = Math.min(1, flake.alpha * (flake.depth === 2 ? 1.18 : 1));
     ctx.fillStyle = '#ffffff';
     ctx.beginPath();
-    ctx.arc(x, y, flake.radius, 0, Math.PI * 2);
+    ctx.arc(x, y, flake.radius * (flake.depth === 2 ? 1.25 : 1), 0, Math.PI * 2);
     ctx.fill();
   }
   ctx.globalAlpha = 1;
 
   // Soft warm glow from the cabin and lanterns.
-  const glow = ctx.createRadialGradient(width * .73, height * .54, 2, width * .73, height * .54, 150);
+  const glowPulse = 0.88 + (Math.sin(frame * 0.045) + 1) * 0.12;
+  const glow = ctx.createRadialGradient(width * .73, height * .54, 2, width * .73, height * .54, 175 * glowPulse);
   glow.addColorStop(0, 'rgba(255,205,112,.17)');
   glow.addColorStop(1, 'rgba(255,205,112,0)');
   ctx.fillStyle = glow;
   ctx.fillRect(width * .42, height * .35, width * .58, height * .42);
 
   // Personal note appears clearly over the snow in the closing section.
-  const fade = Math.min(1, Math.max(0, (frame - 110) / 32));
+  const fade = Math.min(1, Math.max(0, (frame - 165) / 28));
   ctx.globalAlpha = fade;
   ctx.fillStyle = 'rgba(7, 30, 55, .66)';
   ctx.beginPath();
