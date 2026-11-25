@@ -1,0 +1,6 @@
+{
+  "appId": "com.asuncion.winterbearstudio",
+  "appName": "Winter Bear Studio",
+  "webDir": "dist",
+  "bundledWebRuntime": false
+}
