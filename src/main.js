@@ -8,6 +8,9 @@ const message = $('message');
 const previewTo = $('previewTo');
 const previewOccasion = $('previewOccasion');
 const previewMessage = $('previewMessage');
+const notePreviewTo = $('notePreviewTo');
+const notePreviewOccasion = $('notePreviewOccasion');
+const notePreviewMessage = $('notePreviewMessage');
 const count = $('count');
 const createBtn = $('createVideoBtn');
 const progressWrap = $('progressWrap');
@@ -21,6 +24,9 @@ function updatePreview() {
   previewOccasion.textContent = occasion.value;
   previewMessage.textContent = message.value.trim() || 'Your heartfelt message goes here.';
   count.textContent = message.value.length + ' / 500';
+  notePreviewTo.textContent = 'For ' + (recipient.value.trim() || 'someone special');
+  notePreviewOccasion.textContent = occasion.value;
+  notePreviewMessage.textContent = message.value.trim() || 'Your heartfelt message goes here.';
 }
 
 [recipient, occasion, message].forEach((element) => element.addEventListener('input', updatePreview));
@@ -44,9 +50,12 @@ $('saveNoteBtn').addEventListener('click', () => {
 
 updatePreview();
 
-const winterScene = new Image();
-winterScene.src = new URL('../assets/winter-bear-video.webp', import.meta.url).href;
-winterScene.onerror = () => { winterScene.onerror = null; winterScene.src = new URL('./winter-bear-scene.svg', import.meta.url).href; };
+const landscapeScene = new Image();
+landscapeScene.src = new URL('../assets/sample-winter-bear-landscape.webp', import.meta.url).href;
+const portraitScene = new Image();
+portraitScene.src = new URL('../assets/sample-winter-bear-portrait.webp', import.meta.url).href;
+const fallbackScene = new Image();
+fallbackScene.src = new URL('./winter-bear-scene.svg', import.meta.url).href;
 const snowParticles = Array.from({ length: 320 }, (_, i) => ({
   x: (i * 83.17) % 540,
   y: (i * 61.73) % 960,
@@ -64,14 +73,16 @@ function drawCover(ctx, image, width, height) {
 }
 function drawScene(ctx, width, height, frame) {
   const portrait = height > width;
-  if (winterScene.complete && winterScene.naturalWidth) {
+  const winterScene = portrait ? portraitScene : landscapeScene;
+  const sceneImage = winterScene.complete && winterScene.naturalWidth ? winterScene : fallbackScene;
+  if (sceneImage.complete && sceneImage.naturalWidth) {
     if (portrait) {
-      ctx.save(); ctx.filter = 'blur(18px)'; drawCover(ctx,winterScene,width,height); ctx.filter='none';
+      ctx.save(); ctx.filter = 'blur(18px)'; drawCover(ctx,sceneImage,width,height); ctx.filter='none';
       ctx.fillStyle='rgba(5,18,32,.3)'; ctx.fillRect(0,0,width,height);
-      const scale=Math.min(width/winterScene.width,height*.48/winterScene.height);
-      const w=winterScene.width*scale,h=winterScene.height*scale;
-      ctx.drawImage(winterScene,(width-w)/2,height*.25,w,h); ctx.restore();
-    } else drawCover(ctx,winterScene,width,height);
+      const scale=Math.min(width/sceneImage.width,height*.48/sceneImage.height);
+      const w=sceneImage.width*scale,h=sceneImage.height*scale;
+      ctx.drawImage(sceneImage,(width-w)/2,height*.25,w,h); ctx.restore();
+    } else drawCover(ctx,sceneImage,width,height);
   } else { ctx.fillStyle='#173b58'; ctx.fillRect(0,0,width,height); }
   for (const flake of snowParticles) {
     const y=(flake.y+frame*flake.speed*(flake.depth===0?.72:flake.depth===2?1.42:1))%height;
@@ -182,7 +193,7 @@ async function createVideo() {
   createBtn.disabled=true;result.hidden=true;progressWrap.hidden=false;progressBar.style.width='3%';
   status.textContent='Preparing both Winter Bear formats…';let ffmpeg;
   try {
-    if(!winterScene.complete)await new Promise(resolve=>{winterScene.onload=resolve;winterScene.onerror=resolve;});
+    await Promise.all([landscapeScene,portraitScene].map(img => img.complete ? Promise.resolve() : new Promise(resolve => { img.onload=resolve; img.onerror=resolve; })));
     ffmpeg=new FFmpeg();ffmpeg.on('progress',({progress})=>{if(Number.isFinite(progress)&&progress>=0)progressBar.style.width=Math.min(98,43+Math.round(progress*12))+'%';});
     ffmpeg.on('log',({message})=>{if(message)console.log('[Winter Bear FFmpeg]',message);});
     const base=new URL('assets/',document.baseURI);
@@ -195,4 +206,16 @@ async function createVideo() {
   } catch(error) {console.error(error);result.hidden=false;result.textContent='Export could not finish: '+(error.message||String(error));status.textContent='Please try again.';}
   finally {if(ffmpeg)ffmpeg.terminate();createBtn.disabled=false;}
 }
+$('copyBtn').addEventListener('click', async () => {
+  if (!message.value.trim()) { result.hidden=false; result.textContent='Write your message first.'; return; }
+  try { await navigator.clipboard.writeText(message.value.trim()); result.hidden=false; result.textContent='✓ Message copied.'; }
+  catch { result.hidden=false; result.textContent='Copy is unavailable. Please copy the message manually.'; }
+});
+$('downloadBtn').addEventListener('click', () => {
+  const noteText = 'For ' + (recipient.value.trim() || 'someone special') + '\n' + occasion.value + '\n\n' + message.value.trim() + '\n\nAuthor by P. Asuncion';
+  const url = URL.createObjectURL(new Blob([noteText], {type:'text/plain;charset=utf-8'}));
+  const link = document.createElement('a'); link.href=url; link.download='winter-bear-note.txt';
+  document.body.appendChild(link); link.click(); link.remove(); URL.revokeObjectURL(url);
+  result.hidden=false; result.textContent='✓ Your Winter Bear note was downloaded.';
+});
 createBtn.addEventListener('click', createVideo);
