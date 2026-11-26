@@ -25,6 +25,8 @@ jobs:
         run: |
           mkdir -p android/app/src/main/java/com/asuncion/winterbearstudio
           cp android-template/MainActivity.java android/app/src/main/java/com/asuncion/winterbearstudio/MainActivity.java
+          mkdir -p android/app/src/main/res
+          cp -R android-template/res/. android/app/src/main/res/
       - name: Sync Capacitor
         run: npx cap sync android
       - name: Set up Java 21
