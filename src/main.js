@@ -5,9 +5,6 @@ const $ = (id) => document.getElementById(id);
 const recipient = $('recipient');
 const occasion = $('occasion');
 const message = $('message');
-const previewTo = $('previewTo');
-const previewOccasion = $('previewOccasion');
-const previewMessage = $('previewMessage');
 const notePreviewTo = $('notePreviewTo');
 const notePreviewOccasion = $('notePreviewOccasion');
 const notePreviewMessage = $('notePreviewMessage');
@@ -20,9 +17,6 @@ const result = $('result');
 const video = $('videoPreview');
 
 function updatePreview() {
-  previewTo.textContent = 'For ' + (recipient.value.trim() || 'someone special');
-  previewOccasion.textContent = occasion.value;
-  previewMessage.textContent = message.value.trim() || 'Your heartfelt message goes here.';
   count.textContent = message.value.length + ' / 500';
   notePreviewTo.textContent = 'For ' + (recipient.value.trim() || 'someone special');
   notePreviewOccasion.textContent = occasion.value;
