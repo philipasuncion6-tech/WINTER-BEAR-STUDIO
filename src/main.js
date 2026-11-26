@@ -46,13 +46,13 @@ updatePreview();
 
 const winterScene = new Image();
 winterScene.src = new URL('./winter-bear-scene.svg', import.meta.url).href;
-const snowParticles = Array.from({ length: 190 }, (_, i) => ({
+const snowParticles = Array.from({ length: 320 }, (_, i) => ({
   x: (i * 83.17) % 540,
   y: (i * 61.73) % 960,
-  radius: 0.55 + (i % 7) * 0.42,
-  speed: 0.65 + (i % 9) * 0.38,
+  radius: 0.8 + (i % 9) * 0.58,
+  speed: 1.05 + (i % 11) * 0.48,
   drift: Math.sin(i * 2.4) * (0.35 + (i % 4) * 0.18),
-  alpha: 0.28 + (i % 7) * 0.095,
+  alpha: 0.42 + (i % 7) * 0.08,
   depth: i % 3
 }));
 
@@ -67,40 +67,15 @@ function drawScene(ctx, width, height, frame) {
     ctx.fillRect(0, 0, width, height);
   }
 
-  // Living aurora ribbons: slow movement keeps the scene cinematic without heavy rendering.
-  const sway = Math.sin(frame * 0.018) * 24;
-  for (let layer = 0; layer < 3; layer++) {
-    const y = 145 + layer * 66;
-    const ribbon = ctx.createLinearGradient(0, y, width, y + 150);
-    ribbon.addColorStop(0, 'rgba(52,255,205,0)');
-    ribbon.addColorStop(0.42, `rgba(75,255,213,${0.10 + layer * 0.025})`);
-    ribbon.addColorStop(0.72, 'rgba(119,173,255,0.10)');
-    ribbon.addColorStop(1, 'rgba(133,144,255,0)');
-    ctx.beginPath();
-    ctx.moveTo(-30, y + 65);
-    ctx.bezierCurveTo(width * 0.24, y - 45 + sway, width * 0.58, y + 115 - sway, width + 30, y + 18);
-    ctx.lineWidth = 34 - layer * 6;
-    ctx.strokeStyle = ribbon;
-    ctx.stroke();
-  }
-
-  // Soft moon halo pulse adds depth while preserving the original artwork.
-  const moonPulse = 0.92 + (Math.sin(frame * 0.035) + 1) * 0.06;
-  const moonGlow = ctx.createRadialGradient(width * 0.755, height * 0.14, 8, width * 0.755, height * 0.14, 150 * moonPulse);
-  moonGlow.addColorStop(0, 'rgba(210,241,255,0.15)');
-  moonGlow.addColorStop(1, 'rgba(210,241,255,0)');
-  ctx.fillStyle = moonGlow;
-  ctx.fillRect(width * 0.52, 0, width * 0.46, height * 0.32);
-
   // Three depth layers of continuously falling snow.
   for (const flake of snowParticles) {
     const y = (flake.y + frame * flake.speed * (flake.depth === 0 ? 0.72 : flake.depth === 2 ? 1.42 : 1)) % height;
-    const wind = Math.sin(frame * 0.022 + flake.y * 0.025) * (flake.depth === 2 ? 25 : 14);
+    const wind = Math.sin(frame * 0.022 + flake.y * 0.025) * (flake.depth === 2 ? 34 : 20);
     const x = (flake.x + wind + frame * flake.drift * 0.18 + width) % width;
-    ctx.globalAlpha = Math.min(1, flake.alpha * (flake.depth === 2 ? 1.18 : 1));
+    ctx.globalAlpha = Math.min(1, flake.alpha * (flake.depth === 2 ? 1.32 : 1));
     ctx.fillStyle = '#ffffff';
     ctx.beginPath();
-    ctx.arc(x, y, flake.radius * (flake.depth === 2 ? 1.25 : 1), 0, Math.PI * 2);
+    ctx.arc(x, y, flake.radius * (flake.depth === 2 ? 1.45 : 1), 0, Math.PI * 2);
     ctx.fill();
   }
   ctx.globalAlpha = 1;
